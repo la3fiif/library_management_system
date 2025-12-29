@@ -24,7 +24,7 @@ def home(request):
     return render(request, 'index.html')
 
 urlpatterns = [
-    path('', home),
+    path('admin-dashboard/', home),
     path('admin/', admin.site.urls),
     path('api/', include('books.urls')),
     path('api/accounts/', include('accounts.urls')),

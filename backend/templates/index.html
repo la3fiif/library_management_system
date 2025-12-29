@@ -16,6 +16,32 @@
     <h2>Books</h2>
     <ul id="bookList"></ul>
 
+    <hr>
+
+<h2>👤 User</h2>
+{% csrf_token %}
+<input id="username" placeholder="Username">
+<input id="password" placeholder="Password">
+<button onclick="register()">Register</button>
+
+<br><br>
+
+<input id="userid" placeholder="User ID">
+<input id="newusername" placeholder="New Username">
+<button onclick="updateUser()">Update User</button>
+<button onclick="deleteUser()">Delete User</button>
+
+<button onclick="loadUsers()">Load Users</button>
+<ul id="userList"></ul>
+
+<hr>
+
+<h2>🔄 Loans (Admin)</h2>
+
+<button onclick="loadLoans()">Load Loans</button>
+<ul id="loanList"></ul>
+
+
     <script src="/static/app.js"></script>
 </body>
 </html>

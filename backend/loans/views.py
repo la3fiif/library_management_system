@@ -1,10 +1,25 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, generics
+from rest_framework.permissions import AllowAny
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+
+from .serializers import LoanSerializer
 from .models import Loan
 from books.models import Book
 
+class LoanListView(generics.ListAPIView):
+    queryset = Loan.objects.all()
+    serializer_class = LoanSerializer
+
+class LoanDeleteView(generics.DestroyAPIView):
+    queryset = Loan.objects.all()
+    serializer_class = LoanSerializer
+
+@method_decorator(csrf_exempt, name='dispatch')
 class BorrowBookView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         user = request.user
         book = Book.objects.get(id=request.data['book_id'])
@@ -18,7 +33,9 @@ class BorrowBookView(APIView):
 
         return Response({"message": "Book borrowed"})
 
+@method_decorator(csrf_exempt, name='dispatch')
 class ReturnBookView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         loan = Loan.objects.get(id=request.data['loan_id'])
         loan.returned = True
