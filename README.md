@@ -1,0 +1,1 @@
+Run with ```Docker compose up --build```
