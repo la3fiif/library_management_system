@@ -29,8 +29,6 @@
 <input id="userid" placeholder="User ID">
 <input id="newusername" placeholder="New Username">
 <button onclick="updateUser()">Update User</button>
-<button onclick="deleteUser()">Delete User</button>
-
 <button onclick="loadUsers()">Load Users</button>
 <ul id="userList"></ul>
 
@@ -38,8 +36,21 @@
 
 <h2>🔄 Loans (Admin)</h2>
 
-<button onclick="loadLoans()">Load Loans</button>
+<hr>
+
+<h2>Borrow Book</h2>
+<input id="borrowUserId" placeholder="User ID">
+<input id="borrowBookId" placeholder="Book ID">
+<button onclick="borrowBook(
+    document.getElementById('borrowUserId').value,
+    document.getElementById('borrowBookId').value
+)">Borrow</button>
+
+<hr>
+
+<h2>Active Loans</h2>
 <ul id="loanList"></ul>
+
 
 
     <script src="/static/app.js"></script>

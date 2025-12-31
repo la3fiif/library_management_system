@@ -5,6 +5,8 @@ from rest_framework.permissions import AllowAny
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
+from accounts.models import User
+
 from .serializers import LoanSerializer
 from .models import Loan
 from books.models import Book
@@ -19,10 +21,15 @@ class LoanDeleteView(generics.DestroyAPIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class BorrowBookView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
+
     def post(self, request):
-        user = request.user
-        book = Book.objects.get(id=request.data['book_id'])
+        user_id = request.data['user_id']
+        book_id = request.data['book_id']
+
+        user = User.objects.get(id=user_id)
+        book = Book.objects.get(id=book_id)
 
         if book.quantity < 1:
             return Response({"error": "Not available"}, status=400)
@@ -33,11 +40,19 @@ class BorrowBookView(APIView):
 
         return Response({"message": "Book borrowed"})
 
+
 @method_decorator(csrf_exempt, name='dispatch')
 class ReturnBookView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
+
     def post(self, request):
-        loan = Loan.objects.get(id=request.data['loan_id'])
+        loan_id = request.data['loan_id']
+        loan = Loan.objects.get(id=loan_id)
+
+        if loan.returned:
+            return Response({"error": "Already returned"}, status=400)
+
         loan.returned = True
         loan.save()
 

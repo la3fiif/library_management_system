@@ -37,6 +37,24 @@ async function loadBooks() {
     });
 }
 
+async function loadUserBooks() {
+    const res = await fetch('/api/books/');
+    const books = await res.json();
+
+    userBookList.innerHTML = '';
+    books.forEach(b => {
+        if (b.quantity > 0) {
+            userBookList.innerHTML += `
+              <li>
+                ${b.title} (${b.quantity})
+                <button onclick="userBorrow(${b.id})">Borrow</button>
+              </li>
+            `;
+        }
+    });
+}
+
+
 async function addBook() {
     await fetch('/api/books/', {
         method: 'POST',
@@ -75,21 +93,55 @@ async function updateBook(bookId) {
     loadBooks();
 }
 
-async function borrowBook(id) {
+async function borrowBook(userId, id) {
     await fetch('/api/loans/borrow/', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({book_id: id})
+        body: JSON.stringify({book_id: id, user_id: userId})
     });
     loadBooks();
+    loadLoans();
 }
+
+async function userBorrow(bookId) {
+    await fetch('/api/loans/borrow/', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+            user_id: currentUser.id,
+            book_id: bookId
+        })
+    });
+    loadUserBooks();
+    loadMyLoans();
+}
+
+
+async function returnBook(loanId) {
+    await fetch('/api/loans/return/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ loan_id: loanId })
+    });
+    loadBooks();
+    loadLoans();
+}
+
+async function userReturn(loanId) {
+    await fetch('/api/loans/return/', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ loan_id: loanId })
+    });
+    loadUserBooks();
+    loadMyLoans();
+}
+
 
 async function deleteBook(id) {
     await fetch(`/api/books/${id}/`, {method: 'DELETE'});
     loadBooks();
 }
-
-loadBooks();
 
 async function register() {
     await fetch('/api/accounts/register/', {
@@ -104,6 +156,44 @@ async function register() {
     });
 }
 
+async function login() {
+    const res = await fetch('/api/accounts/');
+    const users = await res.json();
+
+    currentUser = users.find(u => 
+        u.username === loginUsername.value
+    );
+
+    if (!currentUser) {
+        alert("User not found");
+        return;
+    }
+
+    loadProfile();
+    loadUserBooks();
+    loadMyLoans();
+}
+
+function loadProfile() {
+    profileInfo.innerText = `Logged in as: ${currentUser.username}`;
+}
+
+async function updateProfile() {
+    await fetch(`/api/accounts/${currentUser.id}/`, {
+        method: 'PATCH',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ username: newUsername.value })
+    });
+    login();
+}
+
+async function deleteProfile() {
+    await fetch(`/api/accounts/${currentUser.id}/`, { method:'DELETE' });
+    currentUser = null;
+    alert("Account deleted");
+}
+
+
 async function updateUser() {
     await fetch(`/api/accounts/${userid.value}/`, {
         method: 'PUT',
@@ -113,10 +203,6 @@ async function updateUser() {
     });
 }
 
-async function deleteUser() {
-    await fetch(`/api/accounts/${userid.value}/`, {method: 'DELETE'});
-}
-
 async function loadLoans() {
     const res = await fetch('/api/loans/');
     const loans = await res.json();
@@ -124,14 +210,34 @@ async function loadLoans() {
     list.innerHTML = '';
 
     loans.forEach(l => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-            Loan #${l.id} — Book ${l.book} — User ${l.user}
-            <button onclick="deleteLoan(${l.id})">Delete</button>
-        `;
-        list.appendChild(li);
+        if (!l.returned) {
+            list.innerHTML += `
+                <li>
+                    User ${l.user} → Book ${l.book}
+                    <button onclick="returnBook(${l.id})">Return</button>
+                </li>
+            `;
+        }
     });
 }
+
+async function loadMyLoans() {
+    const res = await fetch('/api/loans/');
+    const loans = await res.json();
+
+    myLoanList.innerHTML = '';
+    loans
+      .filter(l => l.user === currentUser.id && !l.returned)
+      .forEach(l => {
+        myLoanList.innerHTML += `
+          <li>
+            Book ${l.book}
+            <button onclick="userReturn(${l.id})">Return</button>
+          </li>
+        `;
+      });
+}
+
 
 async function deleteLoan(id) {
     await fetch(`/api/loans/${id}/`, {method: 'DELETE'});
@@ -159,3 +265,14 @@ async function deleteUserById(id) {
     loadUsers();
 }
 
+if (document.getElementById('bookList')) {
+    loadBooks();
+    loadLoans();
+    loadUsers();
+}
+
+if (document.getElementById('userBookList')) {
+    loadUserBooks();
+    loadMyLoans();    
+    console.log("User portal loaded");
+}

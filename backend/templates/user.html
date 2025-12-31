@@ -1,0 +1,31 @@
+<h1>User Portal</h1>
+
+<h2>Register</h2>
+<input id="regUsername" placeholder="Username">
+<input id="regPassword" type="password" placeholder="Password">
+<button onclick="register()">Register</button>
+
+<h2>Login</h2>
+<input id="loginUsername" placeholder="Username">
+<input id="loginPassword" type="password">
+<button onclick="login()">Login</button>
+
+<hr>
+
+<h2>My Profile</h2>
+<p id="profileInfo"></p>
+<input id="newUsername" placeholder="New username">
+<button onclick="updateProfile()">Update</button>
+<button onclick="deleteProfile()">Delete Account</button>
+
+<hr>
+
+<h2>Available Books</h2>
+<ul id="userBookList"></ul>
+
+<hr>
+
+<h2>My Loans</h2>
+<ul id="myLoanList"></ul>
+
+<script src="/static/app.js"></script>
