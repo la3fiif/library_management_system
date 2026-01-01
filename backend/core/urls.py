@@ -19,6 +19,7 @@ from django.urls import path, include
 from django.shortcuts import render
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import TemplateView
 
 def home(request):
     return render(request, 'index.html')
@@ -29,6 +30,7 @@ urlpatterns = [
     path('api/', include('books.urls')),
     path('api/accounts/', include('accounts.urls')),
     path('api/loans/', include('loans.urls')),
+    path('user/', TemplateView.as_view(template_name='user.html')),
 ]
 
 if settings.DEBUG:
